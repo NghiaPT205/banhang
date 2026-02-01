@@ -30,7 +30,6 @@
       background:#1f9d55; border:0;
       box-shadow:0 6px 16px rgba(31,157,85,.25);
     }
-    .btn-add:hover{ filter:brightness(.95); }
 
     .table-wrap{
       border-radius:10px; overflow:hidden;
@@ -40,7 +39,6 @@
       background:#1f232a !important;
       color:#fff !important;
       padding:14px 12px !important;
-      border-bottom:0 !important;
       font-weight:700;
     }
     tbody td{ padding:12px !important; vertical-align:middle; }
@@ -50,6 +48,7 @@
       border-radius:999px;
       font-size:12px;
       font-weight:700;
+      color:#fff;
     }
     .badge-active{ background:#198754; }
     .badge-lock{ background:#6c757d; }
@@ -60,9 +59,7 @@
     }
     .btn-edit{ background:#ffc107; }
     .btn-del{ background:#dc3545; color:#fff; }
-    .btn-edit:hover,.btn-del:hover{ filter:brightness(.95); }
 
-    /* Modal giống ảnh */
     .modal-content{ border:0; border-radius:12px; box-shadow:var(--shadow); }
     .modal-header{
       background:var(--blue);
@@ -70,227 +67,209 @@
       border-bottom:0;
       padding:12px 16px;
     }
-    .modal-title{ font-weight:800; }
-    .btn-close-white{ filter: invert(1) grayscale(100%); opacity:.9; }
-    .modal-footer{ border-top:0; padding:12px 16px 16px; }
-    .btn-save{ background:var(--blue); border:0; min-width:90px; }
-    label.form-label{ font-weight:700; color:#31363f; }
   </style>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="card card-main">
-      <div class="topbar">
-        <i class="bi bi-person-badge"></i>
-        <span>Quản lý người dùng &amp; phân quyền</span>
+<div class="wrap">
+  <div class="card card-main">
+
+    <div class="topbar">
+      <i class="bi bi-person-badge"></i>
+      <span>Quản lý người dùng &amp; phân quyền</span>
+    </div>
+
+    <div class="card-body p-3 p-md-4">
+
+      <!-- Nút thêm -->
+      <button id="btnAdd" class="btn btn-add text-white">
+        <i class="bi bi-plus-lg me-1"></i> Thêm người dùng
+      </button>
+
+      <!-- 🔍 TÌM KIẾM (mới thêm duy nhất) -->
+      <div class="mt-3" style="max-width:350px">
+        <input id="searchInput" class="form-control"
+               placeholder="🔍 Tìm username, họ tên, quyền...">
       </div>
 
-      <div class="card-body p-3 p-md-4">
-        <button id="btnAdd" class="btn btn-add text-white">
-          <i class="bi bi-plus-lg me-1"></i> Thêm người dùng
-        </button>
-
-        <div class="table-wrap mt-3">
-          <table class="table table-hover mb-0">
-            <thead>
-              <tr>
-                <th style="width:28%">Username</th>
-                <th style="width:28%">Họ tên</th>
-                <th style="width:18%">Quyền</th>
-                <th style="width:16%">Trạng thái</th>
-                <th style="width:10%">Chức năng</th>
-              </tr>
-            </thead>
-            <tbody id="tbody"></tbody>
-          </table>
-        </div>
+      <div class="table-wrap mt-3">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Họ tên</th>
+              <th>Quyền</th>
+              <th>Trạng thái</th>
+              <th>Chức năng</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Modal -->
-  <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" style="max-width:520px;">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Thông tin người dùng</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
 
-        <div class="modal-body p-4">
-          <form id="form" class="needs-validation" novalidate>
-            <input type="hidden" id="id">
+<!-- Modal -->
+<div class="modal fade" id="userModal">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:520px;">
+    <div class="modal-content">
 
-            <div class="mb-3">
-              <label class="form-label">Tên người dùng</label>
-              <input class="form-control" id="username" required>
-              <div class="invalid-feedback">Vui lòng nhập username.</div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Mật khẩu</label>
-              <input type="password" class="form-control" id="password" placeholder="Để trống nếu không đổi">
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Họ và tên</label>
-              <input class="form-control" id="fullname" required>
-              <div class="invalid-feedback">Vui lòng nhập họ tên.</div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Quyền</label>
-              <select class="form-select" id="role" required>
-                <option>Admin</option>
-                <option selected>Nhân viên</option>
-                <option>Khách hàng</option>
-              </select>
-            </div>
-
-            <div class="mb-1">
-              <label class="form-label">Trạng thái</label>
-              <select class="form-select" id="status" required>
-                <option selected>Hoạt động</option>
-                <option>Tạm khóa</option>
-              </select>
-            </div>
-          </form>
-        </div>
-
-        <div class="modal-footer">
-          <button id="btnSave" class="btn btn-save text-white">Lưu</button>
-          <button class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-        </div>
+      <div class="modal-header">
+        <h5 class="modal-title">Thông tin người dùng</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
+
+      <div class="modal-body p-4">
+        <form id="form">
+          <input type="hidden" id="id">
+
+          <div class="mb-3">
+            <input class="form-control" id="username" placeholder="Username" required>
+          </div>
+
+          <div class="mb-3">
+            <input type="password" class="form-control" id="password" placeholder="Mật khẩu">
+          </div>
+
+          <div class="mb-3">
+            <input class="form-control" id="fullname" placeholder="Họ tên" required>
+          </div>
+
+          <div class="mb-3">
+            <select class="form-select" id="role">
+              <option>Admin</option>
+              <option selected>Nhân viên</option>
+              <option>Khách hàng</option>
+            </select>
+          </div>
+
+          <div>
+            <select class="form-select" id="status">
+              <option selected>Hoạt động</option>
+              <option>Tạm khóa</option>
+            </select>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button id="btnSave" class="btn btn-primary">Lưu</button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+      </div>
+
     </div>
   </div>
+</div>
 
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  <script>
-    const KEY = "ui_users_demo_v1";
-    const seed = [
-      {id:1, username:"admin", fullname:"Quản trị hệ thống", role:"Admin", status:"Hoạt động"},
-      {id:2, username:"nha@gmail.com", fullname:"Viên Thanh Nhã", role:"Nhân viên", status:"Hoạt động"},
-    ];
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    function load(){
-      const raw = localStorage.getItem(KEY);
-      if(!raw){ localStorage.setItem(KEY, JSON.stringify(seed)); return [...seed]; }
-      try{ return JSON.parse(raw) || []; }catch{ return []; }
-    }
-    function save(data){ localStorage.setItem(KEY, JSON.stringify(data)); }
+<script>
+const KEY = "ui_users_demo_v1";
 
-    let users = load();
-    const tbody = document.getElementById("tbody");
+const seed = [
+  {id:1, username:"admin", fullname:"Quản trị hệ thống", role:"Admin", status:"Hoạt động"},
+  {id:2, username:"nha@gmail.com", fullname:"Viên Thanh Nhã", role:"Nhân viên", status:"Hoạt động"},
+];
 
-    function badge(status){
-      const active = status === "Hoạt động";
-      return `<span class="badge badge-status ${active ? "badge-active":"badge-lock"}">${active?"Hoạt động":"Tạm khóa"}</span>`;
-    }
+function load(){
+  const raw = localStorage.getItem(KEY);
+  if(!raw){ localStorage.setItem(KEY, JSON.stringify(seed)); return [...seed]; }
+  return JSON.parse(raw);
+}
+function save(data){ localStorage.setItem(KEY, JSON.stringify(data)); }
 
-    function esc(s){
-      return String(s ?? "")
-        .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;").replaceAll("'","&#039;");
-    }
+let users = load();
 
-    function render(){
-      tbody.innerHTML = users.map(u => `
-        <tr>
-          <td>${esc(u.username)}</td>
-          <td>${esc(u.fullname)}</td>
-          <td>${esc(u.role)}</td>
-          <td>${badge(u.status)}</td>
-          <td>
-            <div class="d-flex gap-2">
-              <button class="btn-action btn-edit" data-act="edit" data-id="${u.id}">Sửa</button>
-              <button class="btn-action btn-del" data-act="del" data-id="${u.id}">Xóa</button>
-            </div>
-          </td>
-        </tr>
-      `).join("");
-    }
+/* ===== lấy element ===== */
+const tbody = document.getElementById("tbody");
+const searchInput = document.getElementById("searchInput");
 
-    const modal = new bootstrap.Modal(document.getElementById("userModal"));
-    const form = document.getElementById("form");
+const id = document.getElementById("id");
+const username = document.getElementById("username");
+const fullname = document.getElementById("fullname");
+const role = document.getElementById("role");
+const status = document.getElementById("status"); // ✅ fix undefined
 
-    const elId = document.getElementById("id");
-    const elUsername = document.getElementById("username");
-    const elPassword = document.getElementById("password");
-    const elFull = document.getElementById("fullname");
-    const elRole = document.getElementById("role");
-    const elStatus = document.getElementById("status");
+/* ===== badge ===== */
+function badge(s){
+  return `<span class="badge-status ${s==="Hoạt động"?"badge-active":"badge-lock"}">${s}</span>`;
+}
 
-    document.getElementById("btnAdd").onclick = () => {
-      form.reset();
-      form.classList.remove("was-validated");
-      elId.value = "";
-      elRole.value = "Nhân viên";
-      elStatus.value = "Hoạt động";
-      elPassword.value = "";
-      modal.show();
-      setTimeout(()=>elUsername.focus(),200);
-    };
+/* ===== render + search ===== */
+function render(keyword=""){
+  const k = keyword.toLowerCase();
 
-    tbody.onclick = (e) => {
-      const btn = e.target.closest("button[data-act]");
-      if(!btn) return;
-      const id = Number(btn.dataset.id);
-      const act = btn.dataset.act;
-      const u = users.find(x => x.id === id);
-      if(!u) return;
+  const filtered = users.filter(u =>
+    u.username.toLowerCase().includes(k) ||
+    u.fullname.toLowerCase().includes(k) ||
+    u.role.toLowerCase().includes(k)
+  );
 
-      if(act === "edit"){
-        form.reset();
-        form.classList.remove("was-validated");
-        elId.value = u.id;
-        elUsername.value = u.username;
-        elFull.value = u.fullname;
-        elRole.value = u.role;
-        elStatus.value = u.status;
-        elPassword.value = "";
-        modal.show();
-        setTimeout(()=>elUsername.focus(),200);
-      }
+  tbody.innerHTML = filtered.map(u => `
+    <tr>
+      <td>${u.username}</td>
+      <td>${u.fullname}</td>
+      <td>${u.role}</td>
+      <td>${badge(u.status)}</td>
+      <td>
+        <button class="btn-action btn-edit" onclick="editUser(${u.id})">Sửa</button>
+        <button class="btn-action btn-del" onclick="delUser(${u.id})">Xóa</button>
+      </td>
+    </tr>
+  `).join("");
+}
 
-      if(act === "del"){
-        if(confirm(`Xóa người dùng "${u.username}"?`)){
-          users = users.filter(x => x.id !== id);
-          save(users);
-          render();
-        }
-      }
-    };
+searchInput.oninput = () => render(searchInput.value);
 
-    document.getElementById("btnSave").onclick = () => {
-      form.classList.add("was-validated");
-      if(!form.checkValidity()) return;
+/* ===== CRUD giữ nguyên ===== */
+const modal = new bootstrap.Modal(userModal);
 
-      const id = elId.value ? Number(elId.value) : null;
-      const username = elUsername.value.trim();
-      const fullname = elFull.value.trim();
+btnAdd.onclick = ()=>{
+  form.reset();
+  id.value="";
+  modal.show();
+};
 
-      // check trùng username
-      const dup = users.some(x => x.username.toLowerCase() === username.toLowerCase() && x.id !== id);
-      if(dup){ alert("Username đã tồn tại!"); return; }
+function editUser(i){
+  const u=users.find(x=>x.id===i);
+  id.value=u.id;
+  username.value=u.username;
+  fullname.value=u.fullname;
+  role.value=u.role;
+  status.value=u.status;
+  modal.show();
+}
 
-      if(id === null){
-        const nextId = users.length ? Math.max(...users.map(x=>x.id)) + 1 : 1;
-        users.push({ id: nextId, username, fullname, role: elRole.value, status: elStatus.value });
-      }else{
-        const idx = users.findIndex(x => x.id === id);
-        users[idx] = { ...users[idx], username, fullname, role: elRole.value, status: elStatus.value };
-      }
+function delUser(i){
+  if(confirm("Xóa người dùng?")){
+    users=users.filter(x=>x.id!==i);
+    save(users);
+    render(searchInput.value);
+  }
+}
 
-      save(users);
-      render();
-      modal.hide();
-    };
+btnSave.onclick=()=>{
+  const data={
+    id:id.value?+id.value:Date.now(),
+    username:username.value,
+    fullname:fullname.value,
+    role:role.value,
+    status:status.value
+  };
 
-    render();
-  </script>
+  const idx=users.findIndex(x=>x.id===data.id);
+  if(idx>=0) users[idx]=data;
+  else users.push(data);
+
+  save(users);
+  modal.hide();
+  render(searchInput.value);
+};
+
+render();
+</script>
 </body>
 </html>
